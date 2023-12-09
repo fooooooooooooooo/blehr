@@ -16,11 +16,12 @@ name = "blehr"
 path = "src/lib.rs"
 
 [dependencies]
-futures = "0.3.17"
-tokio = { version = "1.11.0", features = ["rt"] }
-uuid = "0.8.2"
-bleasy = "0.1.0"
-log = "0.4.14"
+futures = "0.3.29"
+tokio = { version = "1.35.0", features = ["rt"] }
+uuid = "1.6.1"
+bleasy = "0.2.2"
+log = "0.4.20"
+thiserror = "1.0.50"
 
 [dev-dependencies]
-tokio = { version = "1.11.0", features = ["macros", "rt", "rt-multi-thread"] }
+tokio = { version = "1.35.0", features = ["macros", "rt", "rt-multi-thread"] }

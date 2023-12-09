@@ -4,7 +4,7 @@ use blehr::{Error, Scanner};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<Error>> {
-    let mut scanner = Scanner::new().await?;
+    let mut scanner = Scanner::new();
 
     loop {
         scanner.start().await?;

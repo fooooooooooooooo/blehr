@@ -5,12 +5,14 @@ use bleasy::{Characteristic, Device, Error as BleError, ScanConfig, Scanner as B
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 
-#[derive(Debug)]
+#[derive(thiserror::Error, Debug)]
 pub enum Error {
     /// The device did not have the wanted characteristic, or it could not be accessed
+    #[error("The device did not have the wanted characteristic, or it could not be accessed")]
     CharacteristicNotFound,
     /// An error occurred in the underlying BLE library
-    BleError(BleError),
+    #[error("An error occurred in the underlying BLE library")]
+    BleError(#[from] BleError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -21,10 +23,10 @@ pub struct Scanner {
 }
 
 impl Scanner {
-    pub async fn new() -> Result<Self> {
-        let ble_scanner = BleScanner::new().await.map_err(Error::BleError)?;
+    pub fn new() -> Self {
+        let ble_scanner = BleScanner::new();
 
-        Ok(Self { ble_scanner })
+        Self { ble_scanner }
     }
 
     /// Starts scanning for heart rate sensors.
@@ -59,6 +61,12 @@ impl Scanner {
     /// Stops scanning for BLE heart rate sensors.
     pub async fn stop(&mut self) -> Result<()> {
         self.ble_scanner.stop().await.map_err(Error::BleError)
+    }
+}
+
+impl Default for Scanner {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
