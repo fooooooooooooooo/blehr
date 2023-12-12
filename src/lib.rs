@@ -58,6 +58,10 @@ impl Scanner {
         Ok(Some(Sensor::new(device, characteristic)))
     }
 
+    pub fn device_stream(&mut self) -> impl Stream<Item = Device> + '_ {
+        self.ble_scanner.device_stream()
+    }
+
     /// Stops scanning for BLE heart rate sensors.
     pub async fn stop(&mut self) -> Result<()> {
         self.ble_scanner.stop().await.map_err(Error::BleError)
@@ -82,6 +86,16 @@ impl Sensor {
             device: peripheral,
             characteristic,
         }
+    }
+
+    pub async fn from_device(peripheral: Device) -> Result<Self> {
+        let characteristic = peripheral
+            .characteristic(HEART_RATE_MEASUREMENT)
+            .await
+            .map_err(Error::BleError)?
+            .ok_or(Error::CharacteristicNotFound)?;
+
+        Ok(Self::new(peripheral, characteristic))
     }
 
     /// Provides a stream of heart rate values as [`Option`]\<u8>.
