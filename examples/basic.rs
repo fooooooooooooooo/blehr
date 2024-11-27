@@ -1,31 +1,31 @@
-use futures::StreamExt;
-
 use blehr::{Error, Scanner};
+use futures::StreamExt;
+use log::info;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<Error>> {
-    let mut scanner = Scanner::new();
+  pretty_env_logger::init();
+  let mut scanner = Scanner::new().await?.find_adapter().await?;
 
-    loop {
-        scanner.start().await?;
+  info!("Scanning for HR sensors ...");
 
-        println!("Scanning for HR sensors ...");
-        let mut sensor = scanner.next_sensor().await?.unwrap();
+  loop {
+    info!("Scanning ...");
+    scanner.start().await?;
 
-        println!(
-            "Found {}",
-            sensor
-                .name()
-                .await
-                .unwrap_or_else(|| "unknown sensor".to_string())
-        );
+    if let Some(mut sensor) = scanner.next_sensor().await? {
+      println!(
+        "Found {}",
+        sensor.name().await.unwrap_or_else(|| "unknown sensor".to_string())
+      );
 
-        scanner.stop().await?;
+      scanner.stop().await?;
 
-        if let Ok(mut hr_stream) = sensor.hr_stream().await {
-            while let Some(hr) = hr_stream.next().await {
-                println!("hr: {:?}", hr);
-            }
+      if let Ok(mut hr_stream) = sensor.hr_stream().await {
+        while let Some(hr) = hr_stream.next().await {
+          info!("hr: {:?}", hr);
         }
+      }
     }
+  }
 }
